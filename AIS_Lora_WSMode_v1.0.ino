@@ -246,35 +246,43 @@ void takeMeasurement(char i)
 {
   String command = "";
   command += i;
-  command += "M!";                                                                              // SDI-12 measurement command format  [address]['M'][!]
+  // SDI-12 measurement command format  [address]['M'][!]
+  command += "M!";
   mySDI12.sendCommand(command);
-  while(!mySDI12.available()>5);                                                                // wait for acknowlegement with format [address][ttt (3 char, seconds)][number of measurments available, 0-9]
+  // wait for acknowlegement with format [address][ttt (3 char, seconds)][number of measurments available, 0-9]
+  while(!mySDI12.available()>5);
   delay(100);
-  
-  mySDI12.read();                                                                               //consume address 
-                                                                                                // find out how long we have to wait (in seconds).
+  //consume address
+  mySDI12.read(); 
+  // find out how long we have to wait (in seconds).
   int wait = 0; 
   wait += 100 * mySDI12.read()-'0';
   wait += 10 * mySDI12.read()-'0';
   wait += 1 * mySDI12.read()-'0';
-  
-  mySDI12.read();                                                                               // ignore # measurements, for this simple examlpe
-  mySDI12.read();                                                                               // ignore carriage return
-  mySDI12.read();                                                                               // ignore line feed
+  // ignore # measurements, for this simple examlpe
+  mySDI12.read();
+  // ignore carriage return
+  mySDI12.read();
+  // ignore line feed
+  mySDI12.read();
   
   long timerStart = millis();
   while((millis() - timerStart) > (1000 * wait))
   {
-    if(mySDI12.available()) break;                                                              //sensor can interrupt us to let us know it is done early
+    //sensor can interrupt us to let us know it is done early
+    if(mySDI12.available()) break;
   }
-                                                                                                  // in this example we will only take the 'DO' measurement  
+  // in this example we will only take the 'DO' measurement  
   mySDI12.flush(); 
   command = "";
   command += i;
-  command += "D0!";                                                                             // SDI-12 command to get data [address][D][dataOption][!]
+  // SDI-12 command to get data [address][D][dataOption][!]
+  command += "D0!";
   mySDI12.sendCommand(command);
-  while(!mySDI12.available()>1);                                                                // wait for acknowlegement  
-  delay(300);                                                                                   // let the data transfer
+  // wait for acknowlegement
+  while(!mySDI12.available()>1);
+  // let the data transfer
+  delay(300);
   printBufferToScreen();
   mySDI12.flush();
 }
@@ -283,7 +291,8 @@ void printBufferToScreen()
   String buffer = "";
   String buffer1 = "";
   String buffer2 = "";
-  mySDI12.read();                                                                               // consume address
+  // consume address
+  mySDI12.read();
   while(mySDI12.available())
   {
     char c = mySDI12.read();
@@ -304,7 +313,6 @@ void printBufferToScreen()
  f_soil_dielctric = buffer1.toFloat();
  f_soil_temp = buffer2.toFloat();
 }
-
 // gets identification information from a sensor, and prints it to the serial port
 // expects a character between '0'-'9', 'a'-'z', or 'A'-'Z'.
 char printInfo(char i)
@@ -328,7 +336,6 @@ char printInfo(char i)
     delay(5);
   } 
 }
-
 // converts allowable address characters '0'-'9', 'a'-'z', 'A'-'Z',
 // to a decimal number between 0 and 61 (inclusive) to cover the 62 possible addresses
 byte charToDec(char i)
@@ -347,4 +354,3 @@ char decToChar(byte i)
   if((i >= 10) && (i <= 36)) return i + 'a' - 10;
   if((i >= 37) && (i <= 62)) return i + 'A' - 37;
 }
-
